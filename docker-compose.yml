@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: pos-db
+    environment:
+      POSTGRES_DB: posdb
+      POSTGRES_USER: posuser
+      POSTGRES_PASSWORD: pospassword
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  app:
+    build: .
+    container_name: pos-app
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/posdb
+      SPRING_DATASOURCE_USERNAME: posuser
+      SPRING_DATASOURCE_PASSWORD: pospassword
+
+volumes:
+  postgres_data:
