@@ -1,3 +1,4 @@
+issue.md
 target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/resources/com/google/cloud/functions/test-resources/*.json
