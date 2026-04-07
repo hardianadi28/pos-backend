@@ -1,11 +1,11 @@
 package com.retail.pos.modules.user.usecase;
 
 import com.retail.pos.modules.user.domain.User;
-import com.retail.pos.modules.user.infrastructure.JpaRoleRepository;
-import com.retail.pos.modules.user.infrastructure.JpaUserRepository;
-import com.retail.pos.modules.user.infrastructure.UserEntity;
+import com.retail.pos.modules.user.domain.exception.DuplicateUsernameException;
+import com.retail.pos.modules.user.domain.exception.RoleNotFoundException;
+import com.retail.pos.modules.user.usecase.port.RolePort;
+import com.retail.pos.modules.user.usecase.port.UserPort;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,22 +17,22 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class RegisterUserInteractor implements RegisterUserUseCase {
 
-    private final JpaUserRepository userRepository;
-    private final JpaRoleRepository roleRepository;
-    private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    private final UserPort userPort;
+    private final RolePort rolePort;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     @Transactional
     public User execute(RegisterUserCommand command) {
-        if (userRepository.existsByUsername(command.getUsername())) {
-            throw new RuntimeException("Username already exists");
+        if (userPort.existsByUsername(command.getUsername())) {
+            throw new DuplicateUsernameException("Username already exists: " + command.getUsername());
         }
 
-        if (!roleRepository.existsById(command.getRoleId())) {
-            throw new RuntimeException("Role not found");
+        if (!rolePort.existsById(command.getRoleId())) {
+            throw new RoleNotFoundException("Role not found with id: " + command.getRoleId());
         }
 
-        UserEntity userEntity = UserEntity.builder()
+        User user = User.builder()
                 .id(UUID.randomUUID())
                 .roleId(command.getRoleId())
                 .username(command.getUsername())
@@ -44,16 +44,6 @@ public class RegisterUserInteractor implements RegisterUserUseCase {
                 .updatedAt(OffsetDateTime.now())
                 .build();
 
-        userRepository.save(userEntity);
-
-        return User.builder()
-                .id(userEntity.getId())
-                .roleId(userEntity.getRoleId())
-                .username(userEntity.getUsername())
-                .name(userEntity.getName())
-                .isActive(userEntity.getIsActive())
-                .createdAt(userEntity.getCreatedAt())
-                .updatedAt(userEntity.getUpdatedAt())
-                .build();
+        return userPort.save(user);
     }
 }

@@ -1,5 +1,6 @@
 package com.retail.pos.modules.user.adapter;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -28,5 +29,6 @@ public class RegisterUserRequest {
     private String name;
 
     @NotNull
-    private UUID role_id;
+    @JsonProperty("role_id")
+    private UUID roleId;
 }
