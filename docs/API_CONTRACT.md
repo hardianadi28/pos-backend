@@ -25,9 +25,17 @@
 * `GET /reports/void-logs`: Laporan pembatalan transaksi untuk kebutuhan audit.
 
 ### 6. User Management (Privileged)
-* `POST /users/register**`
+* `POST /users/register`
     * **Permission:** `USER_CREATE`
     * **Description:** Mendaftarkan user/kasir baru ke dalam sistem.
+    * **Request Payload:**
+    ```json
+    {
+    "username": "azkia_pos",
+    "password": "SecurePassword123",
+    "name": "Azkia",
+    "role_id": "uuid-role-cashier"
+    }
 * `PATCH /users/{id}/deactivate`
     * **Permission:** `USER_DEACTIVATE`
     * **Description:** Menonaktifkan akses user (is_active = false).
@@ -42,3 +50,14 @@
     * **Auth:** Login User
     * **Payload:** `{ "old_password": "...", "new_password": "..." }`
     * **Description:** User mengganti password mereka sendiri.
+
+# API_CONTRACT.md - Standardized API Documentation
+
+## 1. Global Response Wrapper
+Semua API wajib mengembalikan struktur berikut:
+* `success`: boolean
+* `message`: string (user-friendly message)
+* `data`: object/array/null
+* `metadata`: object (opsional, untuk pagination)
+* `error`: object (null jika success=true)
+* `timestamp`: string (ISO 8601)

@@ -30,3 +30,24 @@ Aplikasi Point of Sales khusus retail yang mengutamakan kecepatan transaksi (**3
 * **Reset Password Flow:** * Self-service: User bisa mengubah password sendiri (wajib input password lama).
     * Administrative Reset: Jika user lupa password, Manager dengan permission `RESET_PASSWORD` harus memberikan otorisasi (PIN/Token) untuk menyetel ulang password user tersebut.
 * **Deactivation:** User tidak dihapus dari database (Soft Delete), melainkan diubah status `is_active`-nya menjadi `false` untuk menjaga integritas data transaksi masa lalu.
+
+## 4. Logging & Observability Strategy
+
+### A. Standardized Structured Logging
+* **Format:** Semua log wajib menggunakan format **JSON** agar mudah diurai oleh log manajemen (seperti Loki atau ELK).
+* **Traceability:** Setiap request harus memiliki **Trace ID** (Correlation ID) yang konsisten dari Controller, Usecase, hingga Repository. Gunakan `Micrometer Tracing` atau `Slf4j MDC`.
+
+### B. Categorization of Logs
+1. **Operational Logs:** Mencatat kesehatan aplikasi (Startup, Database connection, Error/Exception).
+2. **Audit Logs (Crucial):** Mencatat aksi perubahan data sensitif oleh user. 
+   * *Format:* `[Timestamp] [User_ID] [Action] [Resource_ID] [Old_Value] [New_Value]`.
+   * *Wajib untuk:* Void transaksi, Perubahan harga, Reset password, dan Adjustment stok.
+3. **Request/Response Logs:** Mencatat metadata HTTP request (Endpoint, Status Code, Latency).
+
+### C. Log Security & Privacy
+* **Data Masking:** Informasi sensitif seperti `password`, `pin`, dan `customer_phone` **haram** tercatat secara eksplisit di log. Gunakan masking (Contoh: `******`).
+* **Retention:** Operational logs disimpan selama 30 hari, sementara Audit Logs disimpan minimal 1 tahun untuk kebutuhan audit finansial.
+
+### D. Tech Stack Requirement (Backend)
+* **Framework:** Logback (default Spring Boot) dengan konfigurasi `logback-spring.xml`.
+* **Standard Fields:** Setiap log entry wajib menyertakan: `timestamp`, `level`, `trace_id`, `user_id` (jika ada), `module`, dan `message`.

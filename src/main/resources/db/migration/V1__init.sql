@@ -1,4 +1,21 @@
--- Initial migration for POS Backend
--- To be populated with initial schema (products, stock_batches, etc.) later in Sprint 1.
+-- Initial migration for User & Security
 
-SELECT 1;
+CREATE TABLE roles (
+    id UUID PRIMARY KEY,
+    name VARCHAR(50) NOT NULL UNIQUE,
+    permissions JSONB NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE users (
+    id UUID PRIMARY KEY,
+    role_id UUID NOT NULL REFERENCES roles(id),
+    username VARCHAR(100) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    pin_hash VARCHAR(255) NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
