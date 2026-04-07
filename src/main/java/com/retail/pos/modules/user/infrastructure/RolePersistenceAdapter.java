@@ -21,12 +21,26 @@ public class RolePersistenceAdapter implements RolePort {
 
     @Override
     public Optional<Role> findById(UUID id) {
-        return roleRepository.findById(id).map(entity -> Role.builder()
+        return roleRepository.findById(id).map(this::toDomain);
+    }
+
+    private Role toDomain(RoleEntity entity) {
+        return Role.builder()
                 .id(entity.getId())
                 .name(entity.getName())
                 .permissions(entity.getPermissions())
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
-                .build());
+                .build();
+    }
+
+    private RoleEntity toEntity(Role role) {
+        return RoleEntity.builder()
+                .id(role.getId())
+                .name(role.getName())
+                .permissions(role.getPermissions())
+                .createdAt(role.getCreatedAt())
+                .updatedAt(role.getUpdatedAt())
+                .build();
     }
 }

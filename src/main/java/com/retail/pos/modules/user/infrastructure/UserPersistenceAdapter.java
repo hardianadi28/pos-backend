@@ -21,7 +21,18 @@ public class UserPersistenceAdapter implements UserPort {
 
     @Override
     public User save(User user) {
-        UserEntity entity = UserEntity.builder()
+        UserEntity entity = toEntity(user);
+        UserEntity savedEntity = userRepository.save(entity);
+        return toDomain(savedEntity);
+    }
+
+    @Override
+    public Optional<User> findById(UUID id) {
+        return userRepository.findById(id).map(this::toDomain);
+    }
+
+    private UserEntity toEntity(User user) {
+        return UserEntity.builder()
                 .id(user.getId())
                 .roleId(user.getRoleId())
                 .username(user.getUsername())
@@ -32,25 +43,10 @@ public class UserPersistenceAdapter implements UserPort {
                 .createdAt(user.getCreatedAt())
                 .updatedAt(user.getUpdatedAt())
                 .build();
-
-        UserEntity savedEntity = userRepository.save(entity);
-
-        return User.builder()
-                .id(savedEntity.getId())
-                .roleId(savedEntity.getRoleId())
-                .username(savedEntity.getUsername())
-                .passwordHash(savedEntity.getPasswordHash())
-                .pinHash(savedEntity.getPinHash())
-                .name(savedEntity.getName())
-                .isActive(savedEntity.getIsActive())
-                .createdAt(savedEntity.getCreatedAt())
-                .updatedAt(savedEntity.getUpdatedAt())
-                .build();
     }
 
-    @Override
-    public Optional<User> findById(UUID id) {
-        return userRepository.findById(id).map(entity -> User.builder()
+    private User toDomain(UserEntity entity) {
+        return User.builder()
                 .id(entity.getId())
                 .roleId(entity.getRoleId())
                 .username(entity.getUsername())
@@ -60,6 +56,6 @@ public class UserPersistenceAdapter implements UserPort {
                 .isActive(entity.getIsActive())
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
-                .build());
+                .build();
     }
 }
