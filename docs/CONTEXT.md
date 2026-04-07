@@ -24,3 +24,9 @@ Aplikasi Point of Sales khusus retail yang mengutamakan kecepatan transaksi (**3
 ### C. Security & Void
 * **RBAC:** Cashier hanya memiliki izin untuk penjualan. Manager/Admin diperlukan untuk fitur sensitif.
 * **Void Policy:** Pembatalan transaksi (Void) wajib memerlukan otorisasi Manager (PIN/QR) dan alasan pembatalan (`reason_code`).
+
+### D. User Management Policy
+* **Privileged Actions:** Register user baru, Deaktivasi user, dan Reset password adalah aksi sensitif yang memerlukan permission khusus (`USER_MANAGEMENT`).
+* **Reset Password Flow:** * Self-service: User bisa mengubah password sendiri (wajib input password lama).
+    * Administrative Reset: Jika user lupa password, Manager dengan permission `RESET_PASSWORD` harus memberikan otorisasi (PIN/Token) untuk menyetel ulang password user tersebut.
+* **Deactivation:** User tidak dihapus dari database (Soft Delete), melainkan diubah status `is_active`-nya menjadi `false` untuk menjaga integritas data transaksi masa lalu.

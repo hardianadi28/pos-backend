@@ -8,8 +8,9 @@
 ## 2. Table Definitions
 
 ### User & Security
-* `roles`: (id, name, permissions[jsonb])
-* `users`: (id, role_id, username, pin_hash, name, is_active)
+* `roles`: (id, name, permissions[jsonb]) 
+    * *Contoh Permission:* `["ADMIN", "USER_CREATE", "USER_DEACTIVATE", "USER_RESET_PASSWORD", "ORDER_VOID"]`
+* `users`: (id, role_id, username, pin_hash, password_hash, name, is_active, created_at, updated_at)
 
 ### Master Data & Inventory
 * `categories`: (id, name)
