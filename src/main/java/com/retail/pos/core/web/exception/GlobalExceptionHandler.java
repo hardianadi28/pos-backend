@@ -1,6 +1,8 @@
 package com.retail.pos.core.web.exception;
 
 import com.retail.pos.core.web.response.WebResponse;
+import com.retail.pos.modules.auth.domain.exception.InvalidCredentialsException;
+import com.retail.pos.modules.auth.domain.exception.UserInactiveException;
 import com.retail.pos.modules.user.domain.exception.DuplicateUsernameException;
 import com.retail.pos.modules.user.domain.exception.RoleNotFoundException;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +19,20 @@ import java.util.Map;
 @RestControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ResponseEntity<WebResponse<Object>> handleInvalidCredentialsException(InvalidCredentialsException e) {
+        log.warn("Invalid Credentials: {}", e.getMessage());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(WebResponse.error(e.getMessage(), null));
+    }
+
+    @ExceptionHandler(UserInactiveException.class)
+    public ResponseEntity<WebResponse<Object>> handleUserInactiveException(UserInactiveException e) {
+        log.warn("User Inactive: {}", e.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(WebResponse.error(e.getMessage(), null));
+    }
 
     @ExceptionHandler(DuplicateUsernameException.class)
     public ResponseEntity<WebResponse<Object>> handleDuplicateUsernameException(DuplicateUsernameException e) {
