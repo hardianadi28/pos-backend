@@ -3,6 +3,7 @@ package com.retail.pos.core.web.exception;
 import com.retail.pos.core.web.response.WebResponse;
 import com.retail.pos.modules.user.domain.exception.DuplicateUsernameException;
 import com.retail.pos.modules.user.domain.exception.RoleNotFoundException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -14,16 +15,19 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(DuplicateUsernameException.class)
     public ResponseEntity<WebResponse<Object>> handleDuplicateUsernameException(DuplicateUsernameException e) {
+        log.warn("Duplicate Username Exception: {}", e.getMessage());
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(WebResponse.error(e.getMessage(), null));
     }
 
     @ExceptionHandler(RoleNotFoundException.class)
     public ResponseEntity<WebResponse<Object>> handleRoleNotFoundException(RoleNotFoundException e) {
+        log.warn("Role Not Found Exception: {}", e.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(WebResponse.error(e.getMessage(), null));
     }
@@ -37,12 +41,14 @@ public class GlobalExceptionHandler {
             errors.put(fieldName, errorMessage);
         });
 
+        log.warn("Validation Exception: {}", errors);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(WebResponse.error("Validation failed", errors));
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<WebResponse<Object>> handleGeneralException(Exception e) {
+        log.error("Unhandled Exception: ", e);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(WebResponse.error("An unexpected error occurred: " + e.getMessage(), null));
     }

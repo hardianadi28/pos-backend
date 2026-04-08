@@ -31,4 +31,15 @@ public class RegisterUserRequest {
     @NotNull
     @JsonProperty("role_id")
     private UUID roleId;
+
+    @Override
+    public String toString() {
+        return "RegisterUserRequest(" +
+                "username='" + username + '\'' +
+                ", password='****'" +
+                ", pin='****'" +
+                ", name='" + name + '\'' +
+                ", roleId=" + roleId +
+                ')';
+    }
 }
