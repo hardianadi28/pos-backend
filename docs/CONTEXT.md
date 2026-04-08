@@ -22,7 +22,8 @@ Aplikasi Point of Sales khusus retail yang mengutamakan kecepatan transaksi (**3
 * **Limitation:** Wajib memiliki fitur *capping* (batas maksimal rupiah) dan limitasi frekuensi penggunaan.
 
 ### C. Security & Void
-* **RBAC:** Cashier hanya memiliki izin untuk penjualan. Manager/Admin diperlukan untuk fitur sensitif.
+* **Authentication:** Menggunakan JWT (JSON Web Token) yang bersifat stateless. Token memiliki batas waktu kadaluarsa (expiry) hingga akhir hari (End of Day - 23:59:59).
+* **RBAC:** Akses endpoint dilindungi menggunakan Spring Security berbasis role (contoh: endpoint pendaftaran user hanya bisa diakses oleh ADMIN atau SUPERVISOR). Cashier hanya memiliki izin untuk penjualan.
 * **Void Policy:** Pembatalan transaksi (Void) wajib memerlukan otorisasi Manager (PIN/QR) dan alasan pembatalan (`reason_code`).
 
 ### D. User Management Policy

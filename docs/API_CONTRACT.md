@@ -4,7 +4,7 @@
 **Header:** `Authorization: Bearer <JWT>`, `X-Idempotency-Key: <UUID>`
 
 ### 1. Authentication
-* `POST /auth/login`: Login kasir menggunakan PIN atau Username.
+* `POST /auth/login`: Login menggunakan username dan password. Mengembalikan JWT Token dan waktu kedaluwarsa (hingga akhir hari). Bersifat publik (Permit All) tanpa perlu header Authorization.
 
 ### 2. Synchronization (Offline Support)
 * `GET /sync/products?last_sync=<timestamp>`: Mengambil perubahan data master (Differential Sync).
@@ -26,7 +26,7 @@
 
 ### 6. User Management (Privileged)
 * `POST /users/register`
-    * **Permission:** `USER_CREATE`
+    * **Permission/Role:** Wajib memiliki role `ADMIN` atau `SUPERVISOR` (menggunakan JWT Auth).
     * **Description:** Mendaftarkan user/kasir baru ke dalam sistem.
     * **Request Payload:**
     ```json
