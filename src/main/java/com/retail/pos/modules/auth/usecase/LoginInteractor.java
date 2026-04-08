@@ -3,6 +3,8 @@ package com.retail.pos.modules.auth.usecase;
 import com.retail.pos.core.security.JwtService;
 import com.retail.pos.modules.auth.adapter.LoginRequest;
 import com.retail.pos.modules.auth.adapter.LoginResponse;
+import com.retail.pos.modules.auth.domain.exception.InvalidCredentialsException;
+import com.retail.pos.modules.auth.domain.exception.UserInactiveException;
 import com.retail.pos.modules.user.domain.Role;
 import com.retail.pos.modules.user.domain.User;
 import com.retail.pos.modules.user.usecase.port.RolePort;
@@ -29,14 +31,14 @@ public class LoginInteractor {
 
     public LoginResponse login(LoginRequest request) {
         User user = userPort.findByUsername(request.getUsername())
-                .orElseThrow(() -> new RuntimeException("Invalid username or password"));
+                .orElseThrow(() -> new InvalidCredentialsException("Invalid username or password"));
 
         if (!user.getIsActive()) {
-            throw new RuntimeException("User is inactive");
+            throw new UserInactiveException("User is inactive");
         }
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
-            throw new RuntimeException("Invalid username or password");
+            throw new InvalidCredentialsException("Invalid username or password");
         }
 
         Role role = rolePort.findById(user.getRoleId())

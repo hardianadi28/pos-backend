@@ -3,6 +3,8 @@ package com.retail.pos.modules.auth.usecase;
 import com.retail.pos.core.security.JwtService;
 import com.retail.pos.modules.auth.adapter.LoginRequest;
 import com.retail.pos.modules.auth.adapter.LoginResponse;
+import com.retail.pos.modules.auth.domain.exception.InvalidCredentialsException;
+import com.retail.pos.modules.auth.domain.exception.UserInactiveException;
 import com.retail.pos.modules.user.domain.Role;
 import com.retail.pos.modules.user.domain.User;
 import com.retail.pos.modules.user.usecase.port.RolePort;
@@ -77,6 +79,24 @@ class LoginInteractorTest {
     }
 
     @Test
+    void shouldThrowExceptionWhenUserInactive() {
+        User user = User.builder()
+                .username("inactive")
+                .passwordHash("hashed_password")
+                .isActive(false)
+                .build();
+
+        when(userPort.findByUsername("inactive")).thenReturn(Optional.of(user));
+
+        LoginRequest request = LoginRequest.builder()
+                .username("inactive")
+                .password("password")
+                .build();
+
+        assertThrows(UserInactiveException.class, () -> loginInteractor.login(request));
+    }
+
+    @Test
     void shouldThrowExceptionWhenUserNotFound() {
         when(userPort.findByUsername("unknown")).thenReturn(Optional.empty());
 
@@ -85,7 +105,7 @@ class LoginInteractorTest {
                 .password("password")
                 .build();
 
-        assertThrows(RuntimeException.class, () -> loginInteractor.login(request));
+        assertThrows(InvalidCredentialsException.class, () -> loginInteractor.login(request));
     }
 
     @Test
@@ -104,6 +124,6 @@ class LoginInteractorTest {
                 .password("wrong")
                 .build();
 
-        assertThrows(RuntimeException.class, () -> loginInteractor.login(request));
+        assertThrows(InvalidCredentialsException.class, () -> loginInteractor.login(request));
     }
 }
