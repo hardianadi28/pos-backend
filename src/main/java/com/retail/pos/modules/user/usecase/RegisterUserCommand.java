@@ -12,4 +12,15 @@ public class RegisterUserCommand {
     private String pin;
     private String name;
     private UUID roleId;
+
+    @Override
+    public String toString() {
+        return "RegisterUserCommand(" +
+                "username='" + username + '\'' +
+                ", password='****'" +
+                ", pin='****'" +
+                ", name='" + name + '\'' +
+                ", roleId=" + roleId +
+                ')';
+    }
 }
