@@ -51,6 +51,59 @@
     * **Payload:** `{ "old_password": "...", "new_password": "..." }`
     * **Description:** User mengganti password mereka sendiri.
 
+### 8. Stock Management Module (Detailed)
+
+* `POST /api/v1/inventory/inbound`
+    * **Description:** Menambah stok baru dan membuat batch.
+    * **Request:**
+    ```json
+    {
+    "product_id": "uuid",
+    "supplier_id": "uuid",
+    "qty": 50,
+    "cost_price": 8500,
+    "expiry_date": "2027-01-01",
+    "batch_number": "PO-2026-001"
+    }
+
+* `POST /api/v1/inventory/stock-opname`
+    * **Description:** Input hasil audit fisik (Blind Count).
+    * **Request:**
+    ```json
+    {
+    "batch_id": "uuid",
+    "physical_qty": 48,
+    "reason": "Damaged/Lost",
+    "authorized_by_manager_pin": "123456"
+    }
+
+* `GET /api/v1/inventory/expiring-soon`
+    * **Description:** List batch yang mendekati kadaluarsa dalam X hari.
+    * **Response:**
+    ```json
+    {
+        "success": true,
+        "data": [
+            {
+            "batch_id": "b1",
+            "product_name": "Susu UHT",
+            "expiry_date": "2026-05-01",
+            "days_left": 23
+            }
+        ]
+    }
+* `GET /api/v1/inventory/logs/{product_id}`
+    * **Description:** Melihat sejarah pergerakan stok untuk audit.
+    * **Response:**
+    ```json
+    {
+        "success": true,
+        "data": [
+            { "type": "SALE", "qty_change": -1, "balance": 49, "ref": "INV-001" },
+            { "type": "INBOUND", "qty_change": 50, "balance": 50, "ref": "PO-99" }
+        ]
+    }
+
 # API_CONTRACT.md - Standardized API Documentation
 
 ## 1. Global Response Wrapper

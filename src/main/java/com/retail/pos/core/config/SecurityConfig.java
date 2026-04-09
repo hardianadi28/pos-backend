@@ -28,6 +28,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/users/register").hasAnyRole("ADMIN", "SUPERVISOR")
+                        .requestMatchers("/api/v1/products/**").hasAnyRole("ADMIN", "SUPERVISOR")
+                        .requestMatchers("/api/v1/inventory/**").hasAnyRole("ADMIN", "SUPERVISOR")
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
