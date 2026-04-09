@@ -3,9 +3,9 @@ package com.retail.pos.modules.inventory.usecase;
 import com.retail.pos.modules.inventory.domain.StockLog;
 import com.retail.pos.modules.inventory.usecase.port.StockLogPort;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -14,7 +14,7 @@ public class GetStockLogsInteractor {
 
     private final StockLogPort stockLogPort;
 
-    public List<StockLog> execute(UUID productId) {
-        return stockLogPort.findLogsByProductId(productId);
+    public Page<StockLog> execute(UUID productId, int page, int size) {
+        return stockLogPort.findLogsByProductId(productId, page, size);
     }
 }

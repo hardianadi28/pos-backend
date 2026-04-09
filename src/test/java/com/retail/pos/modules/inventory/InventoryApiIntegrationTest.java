@@ -22,8 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -152,6 +151,53 @@ class InventoryApiIntegrationTest extends BaseIntegrationTest {
                         .content(objectMapper.writeValueAsString(inboundRequest)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.data.qty").value(50));
+    }
+
+    @Test
+    void stockOpname_AndPagination_Success() throws Exception {
+        // 1. Setup Product and Stock
+        ProductRequest productRequest = ProductRequest.builder()
+                .categoryId(categoryId).sku("SKU-OP").barcode("BAR-OP").name("Opname Test").uom("PCS").basePrice(BigDecimal.valueOf(1000)).build();
+        String productResponse = mockMvc.perform(post("/api/v1/products").header("Authorization", adminToken).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(productRequest)))
+                .andExpect(status().isCreated()).andReturn().getResponse().getContentAsString();
+        UUID productId = UUID.fromString(objectMapper.readTree(productResponse).get("data").get("id").asText());
+
+        InboundRequest inboundRequest = InboundRequest.builder().productId(productId).batchNumber("B1").qty(100).costPrice(BigDecimal.valueOf(800)).expiryDate(OffsetDateTime.now().plusDays(30).toString()).build();
+        String inboundResponse = mockMvc.perform(post("/api/v1/inventory/inbound").header("Authorization", adminToken).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(inboundRequest)))
+                .andExpect(status().isCreated()).andReturn().getResponse().getContentAsString();
+        UUID batchId = UUID.fromString(objectMapper.readTree(inboundResponse).get("data").get("id").asText());
+
+        // 2. Stock Opname - Success with valid PIN
+        mockMvc.perform(post("/api/v1/inventory/stock-opname")
+                        .header("Authorization", adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "batch_id", batchId,
+                                "physical_qty", 95,
+                                "reason", "Damaged",
+                                "manager_pin", "123456"
+                        ))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.qty").value(95));
+
+        // 3. Stock Opname - Fail with invalid PIN
+        mockMvc.perform(post("/api/v1/inventory/stock-opname")
+                        .header("Authorization", adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "batch_id", batchId,
+                                "physical_qty", 90,
+                                "reason", "Damaged",
+                                "manager_pin", "wrong_pin"
+                        ))))
+                .andExpect(status().isUnauthorized());
+
+        // 4. Get Logs with Pagination
+        mockMvc.perform(get("/api/v1/inventory/logs/" + productId + "?page=0&size=1")
+                        .header("Authorization", adminToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.content.length()").value(1))
+                .andExpect(jsonPath("$.data.totalElements").value(2)); // 1 Inbound + 1 Success Adjustment
     }
 
     @Test

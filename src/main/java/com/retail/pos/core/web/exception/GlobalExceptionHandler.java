@@ -7,6 +7,8 @@ import com.retail.pos.modules.inventory.domain.exception.CategoryNotFoundExcepti
 import com.retail.pos.modules.inventory.domain.exception.DuplicateProductException;
 import com.retail.pos.modules.inventory.domain.exception.InvalidPriceException;
 import com.retail.pos.modules.inventory.domain.exception.ProductNotFoundException;
+import com.retail.pos.modules.inventory.domain.exception.StockBatchNotFoundException;
+import com.retail.pos.modules.inventory.domain.exception.UnauthorizedManagerException;
 import com.retail.pos.modules.user.domain.exception.DuplicateUsernameException;
 import com.retail.pos.modules.user.domain.exception.RoleNotFoundException;
 import lombok.extern.slf4j.Slf4j;
@@ -35,6 +37,20 @@ public class GlobalExceptionHandler {
     public ResponseEntity<WebResponse<Object>> handleDuplicateProductException(DuplicateProductException e) {
         log.warn("Duplicate Product: {}", e.getMessage());
         return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(WebResponse.error(e.getMessage(), null));
+    }
+
+    @ExceptionHandler(StockBatchNotFoundException.class)
+    public ResponseEntity<WebResponse<Object>> handleStockBatchNotFoundException(StockBatchNotFoundException e) {
+        log.warn("Stock Batch Not Found: {}", e.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(WebResponse.error(e.getMessage(), null));
+    }
+
+    @ExceptionHandler(UnauthorizedManagerException.class)
+    public ResponseEntity<WebResponse<Object>> handleUnauthorizedManagerException(UnauthorizedManagerException e) {
+        log.warn("Unauthorized Manager: {}", e.getMessage());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(WebResponse.error(e.getMessage(), null));
     }
 

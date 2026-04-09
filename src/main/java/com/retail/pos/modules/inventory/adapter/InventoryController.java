@@ -6,6 +6,7 @@ import com.retail.pos.modules.inventory.domain.StockLog;
 import com.retail.pos.modules.inventory.usecase.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -59,8 +60,11 @@ public class InventoryController {
     }
 
     @GetMapping("/logs/{productId}")
-    public ResponseEntity<WebResponse<List<StockLog>>> getLogs(@PathVariable UUID productId) {
-        List<StockLog> result = getStockLogsInteractor.execute(productId);
+    public ResponseEntity<WebResponse<Page<StockLog>>> getLogs(
+            @PathVariable UUID productId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Page<StockLog> result = getStockLogsInteractor.execute(productId, page, size);
         return ResponseEntity.ok(WebResponse.success(result, "Stock logs retrieved successfully"));
     }
 }

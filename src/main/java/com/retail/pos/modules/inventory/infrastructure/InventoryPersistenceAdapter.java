@@ -9,6 +9,9 @@ import com.retail.pos.modules.inventory.usecase.port.ProductPort;
 import com.retail.pos.modules.inventory.usecase.port.StockBatchPort;
 import com.retail.pos.modules.inventory.usecase.port.StockLogPort;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
@@ -150,8 +153,8 @@ public class InventoryPersistenceAdapter implements CategoryPort, ProductPort, S
     }
 
     @Override
-    public List<StockLog> findLogsByProductId(UUID productId) {
-        return stockLogRepository.findByProductId(productId).stream()
+    public Page<StockLog> findLogsByProductId(UUID productId, int page, int size) {
+        return stockLogRepository.findByProductId(productId, PageRequest.of(page, size, Sort.by("createdAt").descending()))
                 .map(entity -> StockLog.builder()
                         .id(entity.getId())
                         .productId(entity.getProductId())
@@ -161,7 +164,6 @@ public class InventoryPersistenceAdapter implements CategoryPort, ProductPort, S
                         .balance(entity.getBalance())
                         .refId(entity.getRefId())
                         .createdAt(entity.getCreatedAt())
-                        .build())
-                .collect(Collectors.toList());
+                        .build());
     }
 }

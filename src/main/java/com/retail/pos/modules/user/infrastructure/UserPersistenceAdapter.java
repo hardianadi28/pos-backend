@@ -5,14 +5,24 @@ import com.retail.pos.modules.user.usecase.port.UserPort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
 public class UserPersistenceAdapter implements UserPort {
 
     private final JpaUserRepository userRepository;
+
+    @Override
+    public List<User> findByRoles(Collection<String> roleNames) {
+        return userRepository.findByRoleNameIn(roleNames).stream()
+                .map(this::toDomain)
+                .collect(Collectors.toList());
+    }
 
     @Override
     public boolean existsByUsername(String username) {
