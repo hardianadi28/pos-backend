@@ -3,6 +3,10 @@ package com.retail.pos.core.web.exception;
 import com.retail.pos.core.web.response.WebResponse;
 import com.retail.pos.modules.auth.domain.exception.InvalidCredentialsException;
 import com.retail.pos.modules.auth.domain.exception.UserInactiveException;
+import com.retail.pos.modules.inventory.domain.exception.CategoryNotFoundException;
+import com.retail.pos.modules.inventory.domain.exception.DuplicateProductException;
+import com.retail.pos.modules.inventory.domain.exception.InvalidPriceException;
+import com.retail.pos.modules.inventory.domain.exception.ProductNotFoundException;
 import com.retail.pos.modules.user.domain.exception.DuplicateUsernameException;
 import com.retail.pos.modules.user.domain.exception.RoleNotFoundException;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +23,34 @@ import java.util.Map;
 @RestControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(InvalidPriceException.class)
+    public ResponseEntity<WebResponse<Object>> handleInvalidPriceException(InvalidPriceException e) {
+        log.warn("Invalid Price: {}", e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(WebResponse.error(e.getMessage(), null));
+    }
+
+    @ExceptionHandler(DuplicateProductException.class)
+    public ResponseEntity<WebResponse<Object>> handleDuplicateProductException(DuplicateProductException e) {
+        log.warn("Duplicate Product: {}", e.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(WebResponse.error(e.getMessage(), null));
+    }
+
+    @ExceptionHandler(ProductNotFoundException.class)
+    public ResponseEntity<WebResponse<Object>> handleProductNotFoundException(ProductNotFoundException e) {
+        log.warn("Product Not Found: {}", e.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(WebResponse.error(e.getMessage(), null));
+    }
+
+    @ExceptionHandler(CategoryNotFoundException.class)
+    public ResponseEntity<WebResponse<Object>> handleCategoryNotFoundException(CategoryNotFoundException e) {
+        log.warn("Category Not Found: {}", e.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(WebResponse.error(e.getMessage(), null));
+    }
 
     @ExceptionHandler(InvalidCredentialsException.class)
     public ResponseEntity<WebResponse<Object>> handleInvalidCredentialsException(InvalidCredentialsException e) {

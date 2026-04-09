@@ -52,3 +52,24 @@ Aplikasi Point of Sales khusus retail yang mengutamakan kecepatan transaksi (**3
 ### D. Tech Stack Requirement (Backend)
 * **Framework:** Logback (default Spring Boot) dengan konfigurasi `logback-spring.xml`.
 * **Standard Fields:** Setiap log entry wajib menyertakan: `timestamp`, `level`, `trace_id`, `user_id` (jika ada), `module`, dan `message`.
+
+## 5. Detailed Stock Management Logic
+
+### A. Inbound & Batching
+* **Batch Creation:** Setiap transaksi masuk (Stock-In) harus menghasilkan entry baru di `stock_batches`.
+* **UoM Conversion:** Jika input dalam satuan besar (Contoh: Dus), sistem wajib mengonversi ke unit terkecil sebelum disimpan ke `qty` di `stock_batches`.
+* **Cost Tracking:** `cost_price` dicatat per batch untuk mendukung perhitungan margin keuntungan yang presisi per item terjual.
+
+### B. Stock Opname & Adjustment
+* **Blind Count System:** Aplikasi mobile/frontend tidak menampilkan qty sistem saat staf melakukan input fisik.
+* **Adjustment Policy:** Setiap selisih (Variance) harus melalui persetujuan Manager. Setelah disetujui, sistem membuat log `ADJUSTMENT` di `stock_logs` dan memperbarui `qty` di `stock_batches` terkait.
+
+### C. Expiry & Markdown Management
+* **Smart Audit:** Sistem melacak `expiry_date` pada level batch.
+* **Auto-Discount Trigger:** Batch yang mendekati kadaluarsa (misal: H-30) dapat ditandai statusnya menjadi `EXPIRING_SOON`. 
+* **Pricing Logic:** Saat kasir scan barang, Promotion Engine mengecek status batch. Jika `EXPIRING_SOON`, diskon cuci gudang diaplikasikan secara otomatis.
+
+### D. Audit Trail (The Log Rule)
+Setiap perubahan stok harus memiliki entri di `stock_logs` dengan format:
+`[Timestamp] [Product_ID] [Batch_ID] [Type] [Qty_Change] [Balance_After] [Reference_ID]`
+*Type: SALE, INBOUND, VOID, ADJUSTMENT, RETURN.*
